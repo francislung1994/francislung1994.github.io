@@ -3,13 +3,12 @@
     <title>Multiviewer</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   </head>
-  <body>
+  <body class="unselectable">
     <div align="right">
-      <i class="material-icons" id="icon_grid_view" onClick="viewGrid()" style="display:none;">grid_view</i>
-      <i class="material-icons" id="icon_view_quilt" onClick="viewQuilt()">view_quilt</i>
-      <i class="material-icons" id="icon_fullscreen" onClick="openFullscreen()">fullscreen</i>
-      <i class="material-icons" id="icon_close_fullscreen" onClick="closeFullscreen()" style="display:none;">close_fullscreen</i>
-      <i class="material-icons" onClick="openNav()">menu</i>
+      <i class="material-icons" title="Theater Mode" id="icon_view_quilt" style="color:gray" onClick="switchView()">view_quilt</i>
+      <i class="material-icons" title="FullScreen" id="icon_fullscreen" onClick="openFullscreen()">fullscreen</i>
+      <i class="material-icons" title="Close Fullscreen" id="icon_close_fullscreen" onClick="closeFullscreen()" style="display:none;">close_fullscreen</i>
+      <i class="material-icons" title="Menu" onClick="openNav()">menu</i>
     </div>
     
     <div class="sidenav" id="mySidenav">
@@ -128,8 +127,7 @@
     
     function viewGrid() {
       view = 'grid';
-      document.getElementById("icon_view_quilt").style.display = "inline";
-      document.getElementById("icon_grid_view").style.display = "none";
+      document.getElementById("icon_view_quilt").style.color = "gray";
       const z = document.getElementById("myScreen").childElementCount;
       for(let i=0; i<z; i++) {
         if(z>=7) {
@@ -153,8 +151,7 @@
     <!-- POC -->
     function viewQuilt() {
       view = 'quilt';
-      document.getElementById("icon_view_quilt").style.display = "none";
-      document.getElementById("icon_grid_view").style.display = "inline";
+      document.getElementById("icon_view_quilt").style.color = "white";
       const z = document.getElementById("myScreen").childElementCount;
       for(let i=0; i<z; i++) {
         if(z>=8) {
@@ -188,6 +185,14 @@
         viewQuilt();
       } else {
         viewGrid();
+      }
+    }
+    
+    function switchView() {
+      if(view=='quilt') {
+        viewGrid();
+      } else {
+        viewQuilt();
       }
     }
     
@@ -232,6 +237,15 @@
     
     .videoFrame {
       aspect-ratio: 16/9;
+    }
+    
+    .unselectable {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
   </style>
 </html>

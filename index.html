@@ -1,0 +1,237 @@
+<html>
+  <head>
+    <title>Multiviewer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  </head>
+  <body>
+    <div align="right">
+      <i class="material-icons" id="icon_grid_view" onClick="viewGrid()" style="display:none;">grid_view</i>
+      <i class="material-icons" id="icon_view_quilt" onClick="viewQuilt()">view_quilt</i>
+      <i class="material-icons" id="icon_fullscreen" onClick="openFullscreen()">fullscreen</i>
+      <i class="material-icons" id="icon_close_fullscreen" onClick="closeFullscreen()" style="display:none;">close_fullscreen</i>
+      <i class="material-icons" onClick="openNav()">menu</i>
+    </div>
+    
+    <div class="sidenav" id="mySidenav">
+      <div align="right"><i class="material-icons" onClick="closeNav()">close</i></div>
+      Please enter the links:<br>
+      <form id="myForm">
+      </form>
+    </div>
+  
+    <div class="screen" id="myScreen" align="center" hidden>
+    </div>
+  </body>
+  
+  <script>
+    const navIndex = 0;
+    const maxScreen = 9;
+    var view = '';
+    
+    function initForm() {
+      var f = document.getElementById("myForm");
+      for(let i=0; i<maxScreen; i++) {
+        const element = document.createElement("input");
+        element.setAttribute('type',"text");
+        element.setAttribute('id',"url"+(i+1));
+        f.appendChild(element);
+      }
+      
+      const btnSubmit = document.createElement("button");
+      btnSubmit.setAttribute('type',"button");
+      btnSubmit.setAttribute('onclick',"showVideo()");
+      btnSubmit.textContent = 'Submit';
+      f.appendChild(btnSubmit);
+      
+      const btnClear = document.createElement("button");
+      btnClear.setAttribute('type',"button");
+      btnClear.setAttribute('onclick',"clearForm()");
+      btnClear.textContent = 'Clear';
+      f.appendChild(btnClear);
+    }
+    
+    function initScreen(inputArray) {
+      const s = document.getElementById("myScreen");
+      s.innerHTML = "";
+      for(let i=0; i<inputArray.length; i++) {
+        const element = document.createElement("iframe");
+        element.setAttribute('class',"videoFrame");
+        element.setAttribute('id',"url"+(i+1)+"frame");
+        element.setAttribute('frameborder',"0");
+        element.setAttribute('scrolling',"no");
+        element.setAttribute('allowfullscreen',true);
+        element.setAttribute('src',inputArray[i]);
+        s.appendChild(element);
+      }
+    }
+  
+    function showVideo() {
+      const inputArray = [];
+      for(let i=0; i<maxScreen; i++) {
+        inputValue = document.getElementById("url"+(i+1)).value;
+        if(inputValue!=null && inputValue!="") {
+          if(inputValue.includes("youtu")) {
+            inputValue = youtube_parser(inputValue);
+            inputValue = 'https://www.youtube.com/embed/' + inputValue + "?autoplay=1&enablejsapi=1";
+          }
+          inputArray.push(inputValue);
+        }
+      }
+      initScreen(inputArray);
+      viewVideo();
+      document.querySelector('.screen').removeAttribute('hidden');
+      closeNav();
+    }
+    
+    function clearForm() {
+      document.getElementById("myForm").reset();
+      document.querySelector('.screen').setAttribute('hidden',true);
+      
+    }
+    
+    function openNav() {
+      document.getElementById("mySidenav").style.width = "200px";
+      document.getElementById("mySidenav").style.display = "block";
+      document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
+    }
+    
+    function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+      document.getElementById("mySidenav").style.display = "none";
+      document.body.style.backgroundColor = "#111";
+    }
+    
+    function openFullscreen() {
+      document.getElementById("icon_fullscreen").style.display = "none";
+      document.getElementById("icon_close_fullscreen").style.display = "inline";
+      var elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) { /* Safari */
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) { /* IE11 */
+        elem.msRequestFullscreen();
+      }
+    }
+    
+    function closeFullscreen() {
+      document.getElementById("icon_fullscreen").style.display = "inline";
+      document.getElementById("icon_close_fullscreen").style.display = "none";
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) { /* Safari */
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) { /* IE11 */
+        document.msExitFullscreen();
+      }
+    }
+    
+    function viewGrid() {
+      view = 'grid';
+      document.getElementById("icon_view_quilt").style.display = "inline";
+      document.getElementById("icon_grid_view").style.display = "none";
+      const z = document.getElementById("myScreen").childElementCount;
+      for(let i=0; i<z; i++) {
+        if(z>=7) {
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:calc((100% - 30px)/3); width:auto;");}))
+        }
+        else if(z>=5) {
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:auto; width:calc(100%/3);");}))
+        }
+        else if(z>=3) {
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:calc((100% - 30px)/2); width:auto;");}))
+        }
+        else if(z==2) {
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:auto; width:50%;");}))
+        }
+        else if(z==1) {
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:calc(100% - 30px); width:auto;");}))
+        }
+      }
+    }
+    
+    <!-- POC -->
+    function viewQuilt() {
+      view = 'quilt';
+      document.getElementById("icon_view_quilt").style.display = "none";
+      document.getElementById("icon_grid_view").style.display = "inline";
+      const z = document.getElementById("myScreen").childElementCount;
+      for(let i=0; i<z; i++) {
+        if(z>=8) {
+          // not apply
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:calc((100% - 30px)/3); width:auto;");}))
+        }
+        else if(z>=6) {
+          // not apply
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:auto; width:calc(100%/3);");}))
+        }
+        else if(z>=5) {
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:auto; width:calc(100%/4);");}))
+          document.getElementById("url1frame").setAttribute("style","height:calc((100% - 30px)/2);width:100%;");
+        }
+        else if(z>=3) {
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:calc((100% - 30px)/3); width:auto;");}))
+          document.getElementById("url1frame").setAttribute("style","height:calc((100% - 30px)/3*2);width:100%;");
+        }
+        else if(z==2) {
+          document.getElementById("url1frame").setAttribute("style","height:calc((100% - 30px)/3*2);width:100%;");
+          document.getElementById("url2frame").setAttribute("style","height:calc((100% - 30px)/3);width:auto;");
+        }
+        else if(z==1) {
+          document.querySelectorAll(".videoFrame").forEach((function(x){ x.setAttribute("style","height:calc(100% - 30px); width:100%;");}))
+        }
+      }
+    }
+    
+    function viewVideo() {
+      if(view=='quilt') {
+        viewQuilt();
+      } else {
+        viewGrid();
+      }
+    }
+    
+    function youtube_parser(url){
+      var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+      var match = url.match(regExp);
+      return (match&&match[7].length==11)? match[7] : false;
+    }
+    
+    window.onload = function () {
+      initForm();
+      openNav();
+    }
+  </script>
+  
+  <style>
+    .sidenav {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      right: 0;
+      padding: 8px;
+      display: none;
+      background-color: #111;
+      overflow-x: hidden;
+      transition: 0.5s;
+    }
+  
+    input {
+      margin: 3px;
+    }
+    
+    button {
+      margin: 3px;
+    }
+    
+    #myForm {
+      padding: 3px;
+    }
+    
+    .videoFrame {
+      aspect-ratio: 16/9;
+    }
+  </style>
+</html>

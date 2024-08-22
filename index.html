@@ -5,15 +5,15 @@
   </head>
   <body class="unselectable">
     <div align="right">
-      <i class="material-icons" title="Theater Mode" id="icon_view_quilt" style="color:gray" onClick="switchView()">view_quilt</i>
+      <i class="material-icons" title="Theater Mode" id="icon_view_theater" style="color:gray" onClick="switchView()">view_quilt</i>
       <i class="material-icons" title="FullScreen" id="icon_fullscreen" onClick="openFullscreen()">fullscreen</i>
       <i class="material-icons" title="Close Fullscreen" id="icon_close_fullscreen" onClick="closeFullscreen()" style="display:none;">close_fullscreen</i>
-      <i class="material-icons" title="Menu" onClick="openNav()">menu</i>
+      <i class="material-icons" title="Menu" id="icon_menu" onClick="openNav()">menu</i>
     </div>
     
     <div class="sidenav" id="mySidenav">
       <div align="right"><i class="material-icons" onClick="closeNav()">close</i></div>
-      Please enter the links:<br>
+      <div id="desc">Please enter the video links:</div>
       <form id="myForm">
       </form>
     </div>
@@ -72,14 +72,23 @@
           if(inputValue.includes("youtu")) {
             inputValue = youtube_parser(inputValue);
             inputValue = 'https://www.youtube.com/embed/' + inputValue + "?autoplay=1&enablejsapi=1";
+          } else if(inputValue.includes("twitch")) {
+            inputValue = inputValue.substring(inputValue.lastIndexOf('/') + 1)
+            inputValue = 'https://player.twitch.tv/?channel='+inputValue+'&parent=francislung1994.github.io&autoplay=true';
+          } else if(inputValue=='') {
+            continue;
+          } else {
+            document.getElementById("url"+(i+1)).setCustomValidity("Please enter valid links");
           }
           inputArray.push(inputValue);
         }
       }
-      initScreen(inputArray);
-      viewVideo();
-      document.querySelector('.screen').removeAttribute('hidden');
-      closeNav();
+      if(document.getElementById("myForm").checkValidity()) {
+        initScreen(inputArray);
+        viewVideo();
+        document.querySelector('.screen').removeAttribute('hidden');
+        closeNav();
+      }
     }
     
     function clearForm() {
@@ -127,7 +136,7 @@
     
     function viewGrid() {
       view = 'grid';
-      document.getElementById("icon_view_quilt").style.color = "gray";
+      document.getElementById("icon_view_theater").style.color = "gray";
       const z = document.getElementById("myScreen").childElementCount;
       for(let i=0; i<z; i++) {
         if(z>=7) {
@@ -149,9 +158,9 @@
     }
     
     <!-- POC -->
-    function viewQuilt() {
-      view = 'quilt';
-      document.getElementById("icon_view_quilt").style.color = "white";
+    function viewTheater() {
+      view = 'theater';
+      document.getElementById("icon_view_theater").style.color = "white";
       const z = document.getElementById("myScreen").childElementCount;
       for(let i=0; i<z; i++) {
         if(z>=8) {
@@ -181,18 +190,18 @@
     }
     
     function viewVideo() {
-      if(view=='quilt') {
-        viewQuilt();
+      if(view=='theater') {
+        viewTheater();
       } else {
         viewGrid();
       }
     }
     
     function switchView() {
-      if(view=='quilt') {
+      if(view=='theater') {
         viewGrid();
       } else {
-        viewQuilt();
+        viewTheater();
       }
     }
     
@@ -205,6 +214,21 @@
     window.onload = function () {
       initForm();
       openNav();
+      
+      const locale = navigator.language;
+      if(locale.toLowerCase().startsWith('zh')) {
+        document.getElementById("desc").innerHTML = "請輸入影片網址:";
+        document.getElementById("icon_view_theater").title = "戲院模式";
+        document.getElementById("icon_fullscreen").title = "全屏幕";
+        document.getElementById("icon_close_fullscreen").title = "關閉全屏幕";
+        document.getElementById("icon_menu").title = "選單";
+      } else {
+        document.getElementById("desc").innerHTML = "Please enter the video links:";
+        document.getElementById("icon_view_theater").title = "Theater Mode";
+        document.getElementById("icon_fullscreen").title = "Fullscreen";
+        document.getElementById("icon_close_fullscreen").title = "Close Fullscreen";
+        document.getElementById("icon_menu").title = "Menu";
+      }
     }
   </script>
   
@@ -246,6 +270,12 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+    }
+    
+    input:invalid,
+    select:invalid,
+    textarea:invalid {
+      border-color: red;
     }
   </style>
 </html>
